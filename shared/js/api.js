@@ -2,7 +2,7 @@
 var API = {
     baseURL: window.location.hostname === 'localhost' 
         ? 'http://localhost:3000/api' 
-        : 'https://sistemapuntodeventa-5dd0d54a05c1.herokuapp.com/api',
+        : 'https://cafi-pos-api-931181c1d00b.herokuapp.com/api',
     
     token: localStorage.getItem('cafi_token'),
     usuario: JSON.parse(localStorage.getItem('cafi_usuario') || 'null'),
