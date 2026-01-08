@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAFI - Inventario</title>
+    <link rel="stylesheet" href="inventario.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <svg viewBox="0 0 500 500" width="36" height="36">
+                    <g transform="translate(0,500) scale(0.1,-0.1)">
+                        <path fill="#fff" d="M905 3775 c-5 -2 -22 -6 -37 -9 -62 -14 -127 -102 -128 -174 0 -43 24 -100 58 -135 39 -41 107 -57 246 -57 l121 0 136 -137 137 -138 59 -145 c33 -80 89 -219 124 -309 l64 -165 7 105 c9 150 39 265 103 394 74 150 174 267 305 357 24 16 16 17 -180 17 l-205 1 -175 176 c-96 96 -193 185 -215 197 -37 20 -56 22 -225 24 -102 1 -189 1 -195 -2z"/>
+                        <path fill="#a78bfa" d="M3270 3352 c143 -112 231 -234 285 -399 14 -43 28 -105 32 -138 9 -98 16 -96 -293 -93 l-259 3 -30 58 c-43 83 -88 133 -148 165 -48 25 -61 27 -172 27 -112 0 -124 -2 -178 -29 -60 -30 -126 -95 -157 -156 -39 -77 -52 -147 -48 -264 3 -104 6 -116 40 -188 78 -163 207 -239 382 -225 135 12 252 97 286 210 23 80 11 77 301 77 l258 0 18 -23 17 -24 40 101 c21 56 99 254 174 441 80 202 135 355 136 377 1 45 -32 84 -83 98 -20 6 -168 10 -336 10 l-300 0 35 -28z"/>
+                    </g>
+                </svg>
+                <span>CAFI</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="../pos/index.html" class="nav-item">
+                    <i class="fas fa-cash-register"></i>
+                    <span>Punto de Venta</span>
+                </a>
+                <a href="../empresas/index.html" class="nav-item">
+                    <i class="fas fa-building"></i>
+                    <span>Configuración</span>
+                </a>
+                <a href="#" class="nav-item active">
+                    <i class="fas fa-boxes"></i>
+                    <span>Inventario</span>
+                </a>
+                <div class="nav-divider"></div>
+                <a href="#" class="nav-item" data-section="productos">
+                    <i class="fas fa-box"></i>
+                    <span>Productos</span>
+                </a>
+                <a href="#" class="nav-item" data-section="stock">
+                    <i class="fas fa-cubes"></i>
+                    <span>Stock</span>
+                </a>
+                <a href="#" class="nav-item" data-section="movimientos">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span>Movimientos</span>
+                </a>
+                <div class="nav-divider"></div>
+                <a href="#" class="nav-item" data-section="ajustes">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Ajustes</span>
+                </a>
+                <a href="#" class="nav-item" data-section="traspasos">
+                    <i class="fas fa-truck-loading"></i>
+                    <span>Traspasos</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="user-mini">
+                    <div class="user-avatar" id="userAvatar">US</div>
+                    <div class="user-info">
+                        <span id="userName">Usuario</span>
+                        <small id="userRol">Rol</small>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="API.logout()" title="Cerrar sesión">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-title">
+                    <h1 id="pageTitle"><i class="fas fa-boxes"></i> Inventario</h1>
+                    <p id="pageSubtitle">Gestión de productos y existencias</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-primary" id="btnNuevo" onclick="abrirModalNuevo()">
+                        <i class="fas fa-plus"></i>
+                        <span id="btnNuevoText">Nuevo Producto</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- SECCIÓN PRODUCTOS -->
+            <section class="content-section active" id="seccionProductos">
+                <div class="search-bar">
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="buscarProducto" placeholder="Buscar por código, nombre o descripción..." onkeyup="filtrarProductos()">
+                    </div>
+                    <div class="filter-select">
+                        <select id="filtroCategoria" onchange="filtrarProductos()">
+                            <option value="">Todas las categorías</option>
+                        </select>
+                    </div>
+                    <div class="filter-select">
+                        <select id="filtroTipo" onchange="filtrarProductos()">
+                            <option value="">Todos los tipos</option>
+                            <option value="PRODUCTO">Producto</option>
+                            <option value="SERVICIO">Servicio</option>
+                            <option value="COMBO">Combo</option>
+                            <option value="PAQUETE">Paquete</option>
+                        </select>
+                    </div>
+                    <div class="filter-select">
+                        <select id="filtroEstado" onchange="filtrarProductos()">
+                            <option value="Y">Activos</option>
+                            <option value="N">Inactivos</option>
+                            <option value="">Todos</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body" style="padding:0;">
+                        <div class="table-responsive" style="max-height:calc(100vh - 280px);overflow-y:auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Nombre</th>
+                                        <th>Categoría</th>
+                                        <th>Tipo</th>
+                                        <th>Precio</th>
+                                        <th>Stock</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaProductos">
+                                    <tr><td colspan="8" class="empty">Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN STOCK -->
+            <section class="content-section" id="seccionStock">
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-boxes"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statTotalProductos">0</h4>
+                            <p>Productos</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statStockOk">0</h4>
+                            <p>Stock OK</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon yellow"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statStockBajo">0</h4>
+                            <p>Stock Bajo</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
+                        <div class="stat-info">
+                            <h4 id="statSinStock">0</h4>
+                            <p>Sin Stock</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="search-bar">
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="buscarStock" placeholder="Buscar producto..." onkeyup="filtrarStock()">
+                    </div>
+                    <div class="filter-select">
+                        <select id="filtroAlmacen" onchange="cargarStock()">
+                            <option value="">Todos los almacenes</option>
+                        </select>
+                    </div>
+                    <div class="filter-select">
+                        <select id="filtroStockEstado" onchange="filtrarStock()">
+                            <option value="">Todos</option>
+                            <option value="ok">Stock OK</option>
+                            <option value="bajo">Stock Bajo</option>
+                            <option value="sin">Sin Stock</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body" style="padding:0;">
+                        <div class="table-responsive" style="max-height:calc(100vh - 380px);overflow-y:auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Almacén</th>
+                                        <th>Stock</th>
+                                        <th>Reservado</th>
+                                        <th>Disponible</th>
+                                        <th>Mín</th>
+                                        <th>Máx</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaStock">
+                                    <tr><td colspan="8" class="empty">Selecciona un almacén</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN MOVIMIENTOS -->
+            <section class="content-section" id="seccionMovimientos">
+                <div class="search-bar">
+                    <div class="filter-select">
+                        <select id="filtroMovAlmacen" onchange="cargarMovimientos()">
+                            <option value="">Todos los almacenes</option>
+                        </select>
+                    </div>
+                    <div class="filter-select">
+                        <input type="date" id="filtroMovFechaDesde" onchange="cargarMovimientos()">
+                    </div>
+                    <div class="filter-select">
+                        <input type="date" id="filtroMovFechaHasta" onchange="cargarMovimientos()">
+                    </div>
+                    <div class="search-input">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="buscarMovimiento" placeholder="Buscar por producto..." onkeyup="filtrarMovimientos()">
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body" style="padding:0;">
+                        <div class="table-responsive" style="max-height:calc(100vh - 280px);overflow-y:auto;">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Producto</th>
+                                        <th>Almacén</th>
+                                        <th>Concepto</th>
+                                        <th>Cantidad</th>
+                                        <th>Anterior</th>
+                                        <th>Nueva</th>
+                                        <th>Referencia</th>
+                                        <th>Usuario</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaMovimientos">
+                                    <tr><td colspan="9" class="empty">Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN AJUSTES -->
+            <section class="content-section" id="seccionAjustes">
+                <div class="search-bar">
+                    <div class="filter-select">
+                        <select id="filtroAjusteAlmacen" onchange="cargarAjustes()">
+                            <option value="">Todos los almacenes</option>
+                        </select>
+                    </div>
+                    <div class="filter-select">
+                        <select id="filtroAjusteEstatus" onchange="cargarAjustes()">
+                            <option value="">Todos</option>
+                            <option value="BORRADOR">Borrador</option>
+                            <option value="APLICADO">Aplicado</option>
+                            <option value="CANCELADO">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body" style="padding:0;">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fecha</th>
+                                        <th>Almacén</th>
+                                        <th>Tipo</th>
+                                        <th>Motivo</th>
+                                        <th>Estatus</th>
+                                        <th>Usuario</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaAjustes">
+                                    <tr><td colspan="8" class="empty">Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECCIÓN TRASPASOS -->
+            <section class="content-section" id="seccionTraspasos">
+                <div class="search-bar">
+                    <div class="filter-select">
+                        <select id="filtroTraspasoEstatus" onchange="cargarTraspasos()">
+                            <option value="">Todos</option>
+                            <option value="BORRADOR">Borrador</option>
+                            <option value="SOLICITADO">Solicitado</option>
+                            <option value="EN_TRANSITO">En Tránsito</option>
+                            <option value="RECIBIDO">Recibido</option>
+                            <option value="CANCELADO">Cancelado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-body" style="padding:0;">
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fecha</th>
+                                        <th>Origen</th>
+                                        <th>Destino</th>
+                                        <th>Referencia</th>
+                                        <th>Estatus</th>
+                                        <th>Usuario</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaTraspasos">
+                                    <tr><td colspan="8" class="empty">Cargando...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL PRODUCTO -->
+    <div class="modal-overlay" id="modalProducto">
+        <div class="modal modal-xl">
+            <div class="modal-header">
+                <h3><i class="fas fa-box"></i> <span id="modalProductoTitulo">Nuevo Producto</span></h3>
+                <button class="btn-close" onclick="cerrarModal('modalProducto')"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="formProducto" onsubmit="guardarProducto(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="prod_editing">
+                    
+                    <!-- TABS -->
+                    <div class="tabs">
+                        <div class="tab active" data-tab="tabBasico">Datos Básicos</div>
+                        <div class="tab" data-tab="tabClasificacion">Clasificación</div>
+                        <div class="tab" data-tab="tabUnidades">Unidades</div>
+                        <div class="tab" data-tab="tabPrecios">Precios</div>
+                        <div class="tab" data-tab="tabInventario">Inventario</div>
+                        <div class="tab" data-tab="tabConfig">Configuración</div>
+                    </div>
+                    
+                    <!-- TAB: DATOS BÁSICOS -->
+                    <div class="tab-content active" id="tabBasico">
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-barcode"></i> Códigos</div>
+                            <div class="form-grid-4">
+                                <div class="form-group">
+                                    <label>ID Producto *</label>
+                                    <input type="text" id="prod_producto_id" required maxlength="50" placeholder="AUTO o manual">
+                                </div>
+                                <div class="form-group">
+                                    <label>Código Interno</label>
+                                    <input type="text" id="prod_codigo_interno" maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label>Código Barras</label>
+                                    <input type="text" id="prod_codigo_barras" maxlength="50">
+                                </div>
+                                <div class="form-group">
+                                    <label>SKU</label>
+                                    <input type="text" id="prod_sku" maxlength="50">
+                                </div>
+                            </div>
+                            <div class="form-grid-3" style="margin-top:12px;">
+                                <div class="form-group">
+                                    <label>Código SAT</label>
+                                    <input type="text" id="prod_codigo_sat" maxlength="20">
+                                </div>
+                                <div class="form-group">
+                                    <label>Código Proveedor</label>
+                                    <input type="text" id="prod_codigo_proveedor" maxlength="50">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-font"></i> Nombres</div>
+                            <div class="form-grid">
+                                <div class="form-group col-span-2">
+                                    <label>Nombre Completo *</label>
+                                    <input type="text" id="prod_nombre" required maxlength="200">
+                                </div>
+                                <div class="form-group">
+                                    <label>Nombre Corto</label>
+                                    <input type="text" id="prod_nombre_corto" maxlength="50" placeholder="Para reportes">
+                                </div>
+                                <div class="form-group">
+                                    <label>Nombre POS</label>
+                                    <input type="text" id="prod_nombre_pos" maxlength="50" placeholder="Pantalla POS">
+                                </div>
+                                <div class="form-group">
+                                    <label>Nombre Ticket</label>
+                                    <input type="text" id="prod_nombre_ticket" maxlength="40" placeholder="Impresión ticket">
+                                </div>
+                                <div class="form-group">
+                                    <label>Nombre E-commerce</label>
+                                    <input type="text" id="prod_nombre_ecommerce" maxlength="200">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-align-left"></i> Descripciones</div>
+                            <div class="form-grid">
+                                <div class="form-group col-span-2">
+                                    <label>Descripción</label>
+                                    <textarea id="prod_descripcion" rows="3"></textarea>
+                                </div>
+                                <div class="form-group col-span-2">
+                                    <label>Descripción Corta</label>
+                                    <input type="text" id="prod_descripcion_corta" maxlength="500">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TAB: CLASIFICACIÓN -->
+                    <div class="tab-content" id="tabClasificacion">
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-sitemap"></i> Clasificación</div>
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label>Categoría</label>
+                                    <select id="prod_categoria_id"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Subcategoría</label>
+                                    <select id="prod_subcategoria_id"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Marca</label>
+                                    <select id="prod_marca_id"></select>
+                                </div>
+                            </div>
+                            <div class="form-grid-3" style="margin-top:12px;">
+                                <div class="form-group">
+                                    <label>Tipo *</label>
+                                    <select id="prod_tipo" required>
+                                        <option value="PRODUCTO">Producto</option>
+                                        <option value="SERVICIO">Servicio</option>
+                                        <option value="COMBO">Combo</option>
+                                        <option value="PAQUETE">Paquete</option>
+                                        <option value="MATERIA_PRIMA">Materia Prima</option>
+                                        <option value="INSUMO">Insumo</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-toggle-on"></i> Comportamiento</div>
+                            <div class="form-grid-3">
+                                <div class="form-group switch-group">
+                                    <label>Es Inventariable</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="prod_es_inventariable" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="form-group switch-group">
+                                    <label>Es Vendible</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="prod_es_vendible" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="form-group switch-group">
+                                    <label>Es Comprable</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="prod_es_comprable" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-ruler-combined"></i> Dimensiones (Opcional)</div>
+                            <div class="form-grid-4">
+                                <div class="form-group">
+                                    <label>Peso</label>
+                                    <input type="number" id="prod_peso" step="0.0001" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Unidad Peso</label>
+                                    <select id="prod_peso_unidad">
+                                        <option value="">-</option>
+                                        <option value="KG">KG</option>
+                                        <option value="GR">GR</option>
+                                        <option value="LB">LB</option>
+                                        <option value="OZ">OZ</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Largo</label>
+                                    <input type="number" id="prod_largo" step="0.01" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Ancho</label>
+                                    <input type="number" id="prod_ancho" step="0.01" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Alto</label>
+                                    <input type="number" id="prod_alto" step="0.01" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Unidad Dimensión</label>
+                                    <select id="prod_dimension_unidad">
+                                        <option value="">-</option>
+                                        <option value="CM">CM</option>
+                                        <option value="M">M</option>
+                                        <option value="IN">IN</option>
+                                        <option value="FT">FT</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TAB: UNIDADES -->
+                    <div class="tab-content" id="tabUnidades">
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-balance-scale"></i> Unidades de Medida</div>
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label>Unidad Inventario</label>
+                                    <select id="prod_unidad_inventario_id"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Unidad Compra</label>
+                                    <select id="prod_unidad_compra_id"></select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Unidad Venta</label>
+                                    <select id="prod_unidad_venta_id"></select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-calculator"></i> Factores de Conversión</div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Factor Compra</label>
+                                    <input type="number" id="prod_factor_compra" step="0.0001" min="0" value="1">
+                                    <small>Cuántas unidades inventario = 1 unidad compra</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Factor Venta</label>
+                                    <input type="number" id="prod_factor_venta" step="0.0001" min="0" value="1">
+                                    <small>Cuántas unidades inventario = 1 unidad venta</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TAB: PRECIOS -->
+                    <div class="tab-content" id="tabPrecios">
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-dollar-sign"></i> Costos</div>
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label>Costo</label>
+                                    <input type="number" id="prod_costo" step="0.0001" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Costo Promedio</label>
+                                    <input type="number" id="prod_costo_promedio" step="0.0001" min="0" value="0" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>Último Costo</label>
+                                    <input type="number" id="prod_ultimo_costo" step="0.0001" min="0" value="0" disabled>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-tags"></i> Precios de Venta</div>
+                            <div class="form-grid-4">
+                                <div class="form-group">
+                                    <label>Precio 1 (Principal) *</label>
+                                    <input type="number" id="prod_precio1" step="0.0001" min="0" required value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Precio 2 (Mayoreo)</label>
+                                    <input type="number" id="prod_precio2" step="0.0001" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Precio 3</label>
+                                    <input type="number" id="prod_precio3" step="0.0001" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Precio 4</label>
+                                    <input type="number" id="prod_precio4" step="0.0001" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="form-grid-3" style="margin-top:12px;">
+                                <div class="form-group">
+                                    <label>Precio Mínimo</label>
+                                    <input type="number" id="prod_precio_minimo" step="0.0001" min="0" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-percent"></i> Impuestos y Descuentos</div>
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label>Impuesto Principal</label>
+                                    <select id="prod_impuesto_id"></select>
+                                </div>
+                                <div class="form-group switch-group">
+                                    <label>Precio Incluye Impuesto</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="prod_precio_incluye_impuesto" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-grid-3" style="margin-top:12px;">
+                                <div class="form-group switch-group">
+                                    <label>Permite Descuento</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="prod_permite_descuento" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>Descuento Máximo %</label>
+                                    <input type="number" id="prod_descuento_maximo" step="0.01" min="0" max="100" value="100">
+                                </div>
+                                <div class="form-group">
+                                    <label>Comisión Venta %</label>
+                                    <input type="number" id="prod_comision_venta" step="0.01" min="0" max="100" value="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TAB: INVENTARIO -->
+                    <div class="tab-content" id="tabInventario">
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-cubes"></i> Control de Stock</div>
+                            <div class="form-grid-3">
+                                <div class="form-group">
+                                    <label>Stock Mínimo</label>
+                                    <input type="number" id="prod_stock_minimo" step="0.001" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Stock Máximo</label>
+                                    <input type="number" id="prod_stock_maximo" step="0.001" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Punto de Reorden</label>
+                                    <input type="number" id="prod_punto_reorden" step="0.001" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="form-grid" style="margin-top:12px;">
+                                <div class="form-group">
+                                    <label>Ubicación Almacén</label>
+                                    <input type="text" id="prod_ubicacion_almacen" maxlength="50" placeholder="Ej: A-12-3">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-cog"></i> Control Especial</div>
+                            <div class="form-grid-3">
+                                <div class="form-group switch-group">
+                                    <label>Maneja Caducidad</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="prod_maneja_caducidad">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>Días Caducidad</label>
+                                    <input type="number" id="prod_dias_caducidad" min="0" value="0">
+                                </div>
+                                <div class="form-group switch-group">
+                                    <label>Maneja Series</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="prod_maneja_series">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- TAB: CONFIGURACIÓN -->
+                    <div class="tab-content" id="tabConfig">
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-cash-register"></i> Punto de Venta</div>
+                            <div class="form-grid-4">
+                                <div class="form-group switch-group">
+                                    <label>Mostrar en POS</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="prod_mostrar_pos" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>Color POS</label>
+                                    <div class="color-picker-group">
+                                        <input type="color" id="prod_color_pos_picker" value="#4f46e5">
+                                        <input type="text" id="prod_color_pos" maxlength="20" placeholder="#4f46e5">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Orden POS</label>
+                                    <input type="number" id="prod_orden_pos" min="0" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Tecla Rápida</label>
+                                    <input type="text" id="prod_tecla_rapida" maxlength="10" placeholder="F1, F2...">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-globe"></i> E-commerce</div>
+                            <div class="form-grid">
+                                <div class="form-group switch-group">
+                                    <label>Mostrar en E-commerce</label>
+                                    <label class="switch">
+                                        <input type="checkbox" id="prod_mostrar_ecommerce">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label>URL Amigable</label>
+                                    <input type="text" id="prod_url_amigable" maxlength="200">
+                                </div>
+                                <div class="form-group">
+                                    <label>Meta Título</label>
+                                    <input type="text" id="prod_meta_titulo" maxlength="200">
+                                </div>
+                                <div class="form-group">
+                                    <label>Meta Descripción</label>
+                                    <input type="text" id="prod_meta_descripcion" maxlength="500">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-image"></i> Imagen</div>
+                            <div class="form-grid">
+                                <div class="form-group col-span-2">
+                                    <label>URL Imagen Principal</label>
+                                    <input type="text" id="prod_imagen_url" maxlength="500" placeholder="https://...">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-sticky-note"></i> Notas</div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Notas Internas</label>
+                                    <textarea id="prod_notas_internas" rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Notas Compra</label>
+                                    <textarea id="prod_notas_compra" rows="2"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Notas Venta</label>
+                                    <textarea id="prod_notas_venta" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-section">
+                            <div class="form-section-title"><i class="fas fa-check-circle"></i> Estado</div>
+                            <div class="form-group switch-group">
+                                <label>Producto Activo</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="prod_activo" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal('modalProducto')">Cancelar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL AJUSTE -->
+    <div class="modal-overlay" id="modalAjuste">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3><i class="fas fa-sliders-h"></i> <span id="modalAjusteTitulo">Nuevo Ajuste de Inventario</span></h3>
+                <button class="btn-close" onclick="cerrarModal('modalAjuste')"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="formAjuste" onsubmit="guardarAjuste(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="ajuste_id">
+                    <div class="form-grid-3">
+                        <div class="form-group">
+                            <label>Almacén *</label>
+                            <select id="ajuste_almacen_id" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo *</label>
+                            <select id="ajuste_tipo" required>
+                                <option value="ENTRADA">Entrada</option>
+                                <option value="SALIDA">Salida</option>
+                                <option value="AJUSTE">Ajuste</option>
+                                <option value="MERMA">Merma</option>
+                                <option value="DEVOLUCION">Devolución</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Referencia</label>
+                            <input type="text" id="ajuste_referencia" maxlength="100">
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group col-span-2">
+                            <label>Motivo</label>
+                            <input type="text" id="ajuste_motivo" maxlength="200">
+                        </div>
+                        <div class="form-group col-span-2">
+                            <label>Notas</label>
+                            <textarea id="ajuste_notas" rows="2"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section-title" style="margin-top:20px;"><i class="fas fa-list"></i> Productos</div>
+                    <div class="search-bar" style="margin-bottom:12px;">
+                        <div class="search-input" style="flex:1;">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="buscarProdAjuste" placeholder="Buscar producto..." onkeyup="buscarProductoAjuste()">
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="max-height:200px;overflow-y:auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th style="width:100px;">Cantidad</th>
+                                    <th style="width:100px;">Costo Unit.</th>
+                                    <th style="width:50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaAjusteProductos">
+                                <tr><td colspan="4" class="empty">Agregue productos al ajuste</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal('modalAjuste')">Cancelar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar Borrador</button>
+                    <button type="button" class="btn btn-primary" onclick="aplicarAjuste()"><i class="fas fa-check"></i> Aplicar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL TRASPASO -->
+    <div class="modal-overlay" id="modalTraspaso">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3><i class="fas fa-truck-loading"></i> <span id="modalTraspasoTitulo">Nuevo Traspaso</span></h3>
+                <button class="btn-close" onclick="cerrarModal('modalTraspaso')"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="formTraspaso" onsubmit="guardarTraspaso(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="traspaso_id">
+                    <div class="form-grid-3">
+                        <div class="form-group">
+                            <label>Almacén Origen *</label>
+                            <select id="traspaso_almacen_origen_id" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Almacén Destino *</label>
+                            <select id="traspaso_almacen_destino_id" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Referencia</label>
+                            <input type="text" id="traspaso_referencia" maxlength="100">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Notas</label>
+                        <textarea id="traspaso_notas" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="form-section-title" style="margin-top:20px;"><i class="fas fa-list"></i> Productos</div>
+                    <div class="search-bar" style="margin-bottom:12px;">
+                        <div class="search-input" style="flex:1;">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="buscarProdTraspaso" placeholder="Buscar producto..." onkeyup="buscarProductoTraspaso()">
+                        </div>
+                    </div>
+                    <div class="table-responsive" style="max-height:200px;overflow-y:auto;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th style="width:100px;">Stock Origen</th>
+                                    <th style="width:100px;">Cantidad</th>
+                                    <th style="width:50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaTraspasoProductos">
+                                <tr><td colspan="4" class="empty">Agregue productos al traspaso</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal('modalTraspaso')">Cancelar</button>
+                    <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Guardar</button>
+                    <button type="button" class="btn btn-info" onclick="enviarTraspaso()"><i class="fas fa-paper-plane"></i> Enviar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="../../shared/js/api.js"></script>
+    <script src="inventario.js"></script>
+</body>
+</html>
