@@ -644,7 +644,7 @@ function guardarMetodoPago(e) {
 
 // ==================== UNIDADES DE MEDIDA ====================
 function cargarUnidades() {
-    API.request('/unidades_medida/' + API.getEmpresaID()).then(function(r) {
+    API.request('/unidades/' + API.getEmpresaID()).then(function(r) {
         if (r.success) {
             unidades = r.unidades || [];
             renderUnidades();
@@ -705,7 +705,7 @@ function guardarUnidad(e) {
         tipo: document.getElementById('uni_tipo').value,
         activo: document.getElementById('uni_activo').checked ? 'Y' : 'N'
     };
-    var url = editing ? '/unidades_medida/' + editing : '/unidades-medida';
+    var url = editing ? '/unidades/' + editing : '/unidades';
     API.request(url, editing ? 'PUT' : 'POST', data).then(function(r) {
         if (r.success) {
             mostrarToast('Unidad guardada', 'success');
