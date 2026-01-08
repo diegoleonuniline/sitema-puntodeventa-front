@@ -55,7 +55,8 @@ var API = {
         this.usuario = null;
         localStorage.removeItem('cafi_token');
         localStorage.removeItem('cafi_usuario');
-        window.location.href = '/index.html';
+        var basePath = window.location.pathname.includes('/modules/') ? '../../index.html' : 'index.html';
+        window.location.href = basePath;
     },
     
     isLoggedIn: function() {
